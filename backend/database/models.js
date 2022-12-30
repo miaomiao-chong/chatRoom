@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const models = {
   users: {
-    user: { type: String, require: true },
-    pwd: { type: String, require: true },
-    type: { type: String, require: true },
+    user: { type: String, required: [true, "请输入用户名"] },
+    pwd: { type: String, required: [true, "请输入密码"] },
+    type: { type: String, required: [true, "请选择注册角色"] },
     //头像
     avatar: String,
     //个人简介或者职位简介

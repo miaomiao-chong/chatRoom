@@ -1,12 +1,19 @@
 const Koa = require("koa");
-const app = new Koa();
-
 const Router = require("koa-router");
+const cors = require("koa2-cors");
+const { koaBody } = require("koa-body");
+
+const app = new Koa();
 const router = new Router();
 // const serve = require("koa-static");
 
-const cors = require("koa2-cors");
-const { koaBody } = require("koa-body");
+// 有关socket
+const socket = require("./socket");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const httpServer = createServer(app.callback());
+const io = new Server(httpServer);
+socket(io);
 
 require("./database/index");
 const errorHandler = require("./middleware/errorHandler");
@@ -34,6 +41,6 @@ app.use(router.allowedMethods());
 
 app.on("error", errorHandler);
 // 服务开启在3020端口
-app.listen(3020, () => {
+httpServer.listen(3020, () => {
   console.log("服务开启成功");
 });

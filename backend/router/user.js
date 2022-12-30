@@ -1,7 +1,13 @@
 var Router = require("koa-router");
 var router = new Router({ prefix: "/user" });
 
-const { register, login, getInfoByName } = require("../service/user");
+const {
+  register,
+  login,
+  getInfoByName,
+  update,
+  getlist,
+} = require("../service/user");
 const { SUCCESS_CODE } = require("../utils/constant");
 const verifyAuth = require("../middleware/auth");
 
@@ -56,5 +62,36 @@ router.get("/getInfoByToken", verifyAuth, async (ctx, next) => {
 });
 
 // 更新用户信息
-router.post("/update", verifyAuth, async (ctx, next) => {});
+router.post("/update", verifyAuth, async (ctx, next) => {
+  let body = ctx.request.body;
+  await update(ctx, body)
+    .then((res) => {
+      ctx.response.body = {
+        code: SUCCESS_CODE,
+        message: "更新成功",
+        data: res,
+      };
+    })
+    .catch((err) => {
+      console.log(err);
+      ctx.app.emit("error", new Error("服务端错误"), ctx);
+    });
+});
+
+// 获取用户列表
+router.get("/list", verifyAuth, async (ctx, next) => {
+  const { type } = ctx.query;
+  await getlist(type)
+    .then((res) => {
+      ctx.response.body = {
+        code: SUCCESS_CODE,
+        message: "获取成功",
+        data: res,
+      };
+    })
+    .catch((err) => {
+      console.log(err);
+      ctx.app.emit("error", new Error("服务端错误"), ctx);
+    });
+});
 module.exports = router;

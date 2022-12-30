@@ -8,26 +8,30 @@ const {
 } = require("../utils/constant");
 const { authToken } = require("../utils/util");
 
-var User = models.getModel("users");
+let User = models.getModel("users");
 
 // 注册
 async function register(ctx, obj) {
   const { user, pwd, type } = obj;
   return new Promise(async (resolve, reject) => {
     let res = await User.findOne({ user: user });
-    console.log(res);
     if (res) {
       reject(USER_ALREADY_EXISTS);
       return;
     }
-    if (!user || !pwd) {
-      reject(NAME_OR_PASSWORD_IS_REQUIRED);
-      return;
-    }
-    const userModal = new User({ user, pwd: utils.md5(pwd), type });
+    // 这里用mongoose自带的验证了
+    // if (!user || !pwd) {
+    //   reject(NAME_OR_PASSWORD_IS_REQUIRED);
+    //   return;
+    // }
+    const userModal = new User({ user, pwd: pwd ? utils.md5(pwd) : "", type });
     userModal.save((err, doc) => {
       if (err) {
-        reject(err);
+        const error = err.errors;
+        for (let attr in error) {
+          reject(error[attr]["message"]);
+          return;
+        }
       } else {
         resolve();
       }
@@ -72,8 +76,46 @@ async function getInfoByName(ctx, username) {
     });
   });
 }
+
+async function update(ctx, obj) {
+  return new Promise((resolve, reject) => {
+    // 如果想更新单独一条文档并且返回给应用层，可以使用 findOneAndUpdate 方法。
+    // 需要获取数据就用findOneAndUpdate()，只需要修改数据而不关注修改后数据那就用update()。
+    User.findOneAndUpdate(
+      { user: ctx.username },
+      obj,
+      // 返回最新的doc
+      {
+        fields: { pwd: 0, __v: 0, _id: 0 },
+        new: true,
+      },
+      (err, doc) => {
+        if (err) {
+          reject(err.message);
+          return;
+        }
+        resolve(doc);
+      }
+    );
+  });
+}
+
+// 获取用户列表
+async function getlist(ctx, type) {
+  return new Promise((resolve, reject) => {
+    User.find({ type }, (err, doc) => {
+      if (err) {
+        reject(err.message);
+        return;
+      }
+      resolve(doc);
+    });
+  });
+}
 module.exports = {
   register,
   login,
   getInfoByName,
+  update,
+  getlist,
 };
