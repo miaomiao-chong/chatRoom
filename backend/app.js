@@ -34,7 +34,7 @@ app.use(async (ctx, next) => {
 });
 
 app.use(user.routes());
-// app.use(test.routes());
+app.use(chat.routes());
 
 app.use(router.routes());
 app.use(router.allowedMethods());
@@ -42,5 +42,5 @@ app.use(router.allowedMethods());
 app.on("error", errorHandler);
 // 服务开启在3020端口
 httpServer.listen(3020, () => {
-  console.log("服务开启成功");
+  console.log("服务开启成功", "127.0.0.1:3020");
 });

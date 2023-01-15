@@ -1,5 +1,5 @@
-var Router = require("koa-router");
-var router = new Router({ prefix: "/user" });
+let Router = require("koa-router");
+let router = new Router({ prefix: "/users" });
 
 const {
   register,
@@ -44,7 +44,7 @@ router.post("/login", async (ctx, next) => {
 module.exports = router;
 
 // 获取用户信息
-router.get("/getInfoByToken", verifyAuth, async (ctx, next) => {
+router.get("/info", verifyAuth, async (ctx, next) => {
   // 在verifyAuth中间件已经解好码了
   await getInfoByName(ctx, ctx.username)
     .then((res) => {
